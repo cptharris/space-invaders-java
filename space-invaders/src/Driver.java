@@ -3,20 +3,24 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
 public class Driver extends JPanel implements ActionListener, KeyListener {
-	public int screenW = 800, screenH = 600;
-
-	Alien alien1 = new Alien(100, 100);
+	public int screenW = 1920, screenH = 1080;
+	Alien[][] aliens = new Alien[6][4];
 
 	public void paint(Graphics g) {
 		g.fillRect(0, 0, screenW, screenH);
-		alien1.paint(g);
-		
-		
+		for (Alien[] a1 : aliens) {
+			for (Alien a : a1) {
+				a.paint(g);
+			}
+		}
+
 	}
 
 	public static void main(String[] arg) {
@@ -31,6 +35,14 @@ public class Driver extends JPanel implements ActionListener, KeyListener {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.addKeyListener(this);
 		t.start();
+
+		// generate aliens
+		for (int r = 0; r < aliens.length; r++) {
+			for (int c = 0; c < aliens[r].length; c++) {
+				aliens[r][c] = new Alien(100 * r + 650, 100 * c + 10, c % 2);
+			}
+		}
+
 		frame.setVisible(true);
 	}
 
