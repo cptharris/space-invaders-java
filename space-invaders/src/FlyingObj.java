@@ -10,16 +10,24 @@ public class FlyingObj {
 	protected AffineTransform tx;
 
 	protected int x, y;
+	protected int oX, oY;
 	protected double scaleSize;
+	
+	protected int range;
 
-	public FlyingObj() {
-		img = getImage("/imgs/xwing.png");
+	public FlyingObj(int x, int y, String fileName, double scaleSize) {
+		this.scaleSize = scaleSize;
+		this.oX = this.x = x;
+		this.oY = this.y = y;
+		img = getImage("/imgs/" + fileName);
 		tx = AffineTransform.getTranslateInstance(x, y);
 		init(x, y);
+		
+		range = 650;
 	}
 
-	public void changePicture(int type) {
-		img = getImage("/imgs/alien" + type + ".png");
+	public void changePicture(String fileName) {
+		img = getImage("/imgs/" + fileName);
 		init(x, y);
 	}
 
@@ -48,12 +56,32 @@ public class FlyingObj {
 	protected Image getImage(String path) {
 		Image tempImage = null;
 		try {
-			URL imageURL = Alien.class.getResource(path);
+			URL imageURL = FlyingObj.class.getResource(path);
 			tempImage = Toolkit.getDefaultToolkit().getImage(imageURL);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return tempImage;
+	}
+
+	public String toString() {
+		return "[x=" + x + ", y=" + y + "]";
+	}
+
+	public int getX() {
+		return x;
+	}
+
+	public void setX(int x) {
+		this.x = x;
+	}
+
+	public int getY() {
+		return y;
+	}
+
+	public void setY(int y) {
+		this.y = y;
 	}
 
 }

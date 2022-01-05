@@ -3,15 +3,20 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.Timer;
+import javax.swing.event.MouseInputListener;
 
-public class Driver extends JPanel implements ActionListener, KeyListener {
+public class Driver extends JPanel implements ActionListener, KeyListener, MouseListener {
 	public int screenW = 1920, screenH = 1080;
 	Alien[][] aliens = new Alien[6][4];
+	Player player = new Player(screenW / 2, screenH - 280);
+	ArrayList<Blast> blasts = new ArrayList<Blast>();
 
 	public void paint(Graphics g) {
 		g.fillRect(0, 0, screenW, screenH);
@@ -20,6 +25,11 @@ public class Driver extends JPanel implements ActionListener, KeyListener {
 				a.paint(g);
 			}
 		}
+		for (Blast b : blasts) {
+			b.paint(g);
+		}
+
+		player.paint(g);
 
 	}
 
@@ -34,12 +44,13 @@ public class Driver extends JPanel implements ActionListener, KeyListener {
 		frame.add(this);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.addKeyListener(this);
+		frame.addMouseListener(this);
 		t.start();
 
 		// generate aliens
 		for (int r = 0; r < aliens.length; r++) {
 			for (int c = 0; c < aliens[r].length; c++) {
-				aliens[r][c] = new Alien(100 * r + 650, 100 * c + 10, c % 2);
+				aliens[r][c] = new Alien(100 * r + 650, 100 * c - 150, c % 2);
 			}
 		}
 
@@ -53,7 +64,23 @@ public class Driver extends JPanel implements ActionListener, KeyListener {
 	}
 
 	public void keyPressed(KeyEvent arg0) {
-
+		switch (arg0.getKeyCode()) {
+		case 37: // left
+			player.motion(0);
+			break;
+		case 39: // right
+			player.motion(1);
+			break;
+		case 32: // space
+			// was 68, not 60
+			blasts.add(new Blast(player.getX() + 11, player.getY() + 60));
+			blasts.add(new Blast(player.getX() + 115, player.getY() + 60));
+			
+			break;
+		default:
+			System.out.println("Unrecognized, key code: " + arg0.getKeyCode());
+			break;
+		}
 	}
 
 	public void keyReleased(KeyEvent arg0) {
@@ -61,6 +88,27 @@ public class Driver extends JPanel implements ActionListener, KeyListener {
 	}
 
 	public void keyTyped(KeyEvent arg0) {
+
+	}
+
+	public void mouseClicked(MouseEvent arg0) {
+//		System.out.println(player);
+//		System.out.println(arg0.getX() + ", " + arg0.getY());
+	}
+
+	public void mouseEntered(MouseEvent arg0) {
+
+	}
+
+	public void mouseExited(MouseEvent arg0) {
+
+	}
+
+	public void mousePressed(MouseEvent arg0) {
+
+	}
+
+	public void mouseReleased(MouseEvent arg0) {
 
 	}
 }

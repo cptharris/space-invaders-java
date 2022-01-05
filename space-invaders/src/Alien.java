@@ -1,26 +1,18 @@
 import java.awt.geom.AffineTransform;
 
 public class Alien extends FlyingObj {
-	private int oX, oY;
-	private double scaleSize = 0.05;
 	private int direction;
 
 	public Alien(int x, int y, int type) {
-		img = getImage("/imgs/alien" + type + ".png");
-		this.oX = this.x = x;
-		this.oY = this.y = y;
-
-		tx = AffineTransform.getTranslateInstance(x, y);
-		init(x, y);
+		super(x, y, "alien" + type + ".png", 0.05);
 		direction = 1;
 	}
 
 	public void move() {
-		if (Math.abs(x - oX) > 400) {
+		if (Math.abs(x - oX) > range) {
 			direction *= -1;
 			y += 20;
 		}
-
 		x += 5 * direction;
 	}
 
