@@ -2,7 +2,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
-import java.awt.Color;
 import java.awt.geom.AffineTransform;
 import java.net.URL;
 
@@ -18,9 +17,6 @@ public class FlyingObj {
 	protected int range;
 	protected boolean visible;
 
-	protected static int idNum = 0;
-	protected int id;
-
 	public FlyingObj(int x, int y, String fileName, double scaleSize) {
 		this.scaleSize = scaleSize;
 		this.oX = this.x = x;
@@ -31,9 +27,6 @@ public class FlyingObj {
 
 		range = 650;
 		visible = true;
-
-		id = idNum;
-		idNum++;
 	}
 
 	public void changePicture(String fileName) {
@@ -54,9 +47,9 @@ public class FlyingObj {
 		g2.drawImage(img, tx, null);
 		update();
 
-		g.setColor(Color.red);
+//		g.setColor(Color.red);
 //		g.drawString(id + "", x, y);
-		g.drawRect(x, y, (int) width, (int) height);
+//		g.drawRect(x, y, (int) width, (int) height);
 	}
 
 	public void move() {

@@ -1,10 +1,14 @@
-
 public class Alien extends FlyingObj {
 	private int direction;
+	private int version;
+	private int type;
 
 	public Alien(int x, int y, int type) {
-		super(x, y, "alien" + type + ".png", 0.05);
+		super(x, y, "alien" + type + "0.png", 0.05);
+		this.type = type;
 		direction = 1;
+		version = 0;
+
 	}
 
 	public void move() {
@@ -12,7 +16,20 @@ public class Alien extends FlyingObj {
 			direction *= -1;
 			y += 20;
 		}
-		x += 1 * direction;
+		x += 10 * direction;
+		version++;
+		if (version > 3) {
+			version = 0;
+		}
+		changePicture("alien" + type + version + ".png");
+	}
+
+	public boolean shoot() {
+		if (!visible) {
+			return false;
+		}
+		int i = 200;
+		return (int) (Math.random() * (i) + 1) > i - 1;
 	}
 
 }

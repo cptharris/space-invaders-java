@@ -13,7 +13,7 @@ public class Player extends FlyingObj {
 			x = oX - range;
 		}
 
-		x += vx;
+		x += vx * 15;
 	}
 
 	public void motion(int key) {
@@ -21,13 +21,7 @@ public class Player extends FlyingObj {
 		 * -1: left, 0: stop 1: right
 		 */
 
-		if (key == -1) {
-			vx = -10;
-		} else if (key == 0) {
-			vx = 0;
-		} else if (key == 1) {
-			vx = 10;
-		}
+		vx = key;
 
 	}
 }
