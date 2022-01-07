@@ -2,6 +2,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.Color;
 import java.awt.geom.AffineTransform;
 import java.net.URL;
 
@@ -12,8 +13,13 @@ public class FlyingObj {
 	protected int x, y;
 	protected int oX, oY;
 	protected double scaleSize;
-	
+	protected double width, height;
+
 	protected int range;
+	protected boolean visible;
+
+	protected static int idNum = 0;
+	protected int id;
 
 	public FlyingObj(int x, int y, String fileName, double scaleSize) {
 		this.scaleSize = scaleSize;
@@ -22,8 +28,12 @@ public class FlyingObj {
 		img = getImage("/imgs/" + fileName);
 		tx = AffineTransform.getTranslateInstance(x, y);
 		init(x, y);
-		
+
 		range = 650;
+		visible = true;
+
+		id = idNum;
+		idNum++;
 	}
 
 	public void changePicture(String fileName) {
@@ -32,11 +42,21 @@ public class FlyingObj {
 	}
 
 	public void paint(Graphics g) {
+		if (!visible) {
+			return;
+		}
+		width = img.getWidth(null) * scaleSize;
+		height = img.getHeight(null) * scaleSize;
+
 		move();
 		// these are the 2 lines of code needed draw an image on the screen
 		Graphics2D g2 = (Graphics2D) g;
 		g2.drawImage(img, tx, null);
 		update();
+
+		g.setColor(Color.red);
+//		g.drawString(id + "", x, y);
+		g.drawRect(x, y, (int) width, (int) height);
 	}
 
 	public void move() {
@@ -65,7 +85,7 @@ public class FlyingObj {
 	}
 
 	public String toString() {
-		return "[x=" + x + ", y=" + y + "]";
+		return "[x=" + x + ", y=" + y + ", width=" + width + ", height=" + height + "]";
 	}
 
 	public int getX() {
@@ -82,6 +102,14 @@ public class FlyingObj {
 
 	public void setY(int y) {
 		this.y = y;
+	}
+
+	public boolean isVisible() {
+		return visible;
+	}
+
+	public void setVisible(boolean visible) {
+		this.visible = visible;
 	}
 
 }

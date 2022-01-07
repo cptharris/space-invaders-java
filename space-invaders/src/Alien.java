@@ -1,4 +1,3 @@
-import java.awt.geom.AffineTransform;
 
 public class Alien extends FlyingObj {
 	private int direction;
@@ -13,7 +12,7 @@ public class Alien extends FlyingObj {
 			direction *= -1;
 			y += 20;
 		}
-		x += 5 * direction;
+		x += 1 * direction;
 	}
 
 }
