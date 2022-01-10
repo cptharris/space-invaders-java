@@ -28,7 +28,7 @@ public class Alien extends FlyingObj {
 		if (!visible) {
 			return false;
 		}
-		int i = 200;
+		int i = 500;
 		return (int) (Math.random() * (i) + 1) > i - 1;
 	}
 

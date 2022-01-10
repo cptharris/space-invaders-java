@@ -1,3 +1,4 @@
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -21,7 +22,7 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 	ArrayList<Blast> blasts = new ArrayList<Blast>();
 	ArrayList<Blast> aBlasts = new ArrayList<Blast>();
 
-	int cooldown = 0;
+	int[] cooldown = { 0, 50 };
 
 	public void paint(Graphics g) {
 		g.fillRect(0, 0, screenW, screenH);
@@ -55,14 +56,25 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 			}
 		}
 
+		// compare player with every blast
+		for (int i = 0; i < aBlasts.size(); i++) {
+			Blast b = aBlasts.get(i);
+			if (b.hit(player)) {
+				aBlasts.remove(i);
+				// remove hearts/end game
+				System.out.println("player hit");
+				i--;
+			}
+		}
+
 		// paint aliens
 		for (Alien[] a1 : aliens) {
 			for (Alien a : a1) {
-				a.paint(g);
 				if (a.shoot()) {
 					// alien center is +40,+55
 					aBlasts.add(new Blast(a.getX() + 40, a.getY() + 55, 1));
 				}
+				a.paint(g);
 			}
 		}
 
@@ -78,9 +90,14 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 
 		player.paint(g);
 
-		if (cooldown > 0) {
-			cooldown--;
+		if (cooldown[0] > 0) {
+			cooldown[0]--;
 		}
+
+		g.setColor(new Color(130, 130, 130));
+		g.fillRect(50 - 1, screenH - 100 - 1, cooldown[1] * (200 / cooldown[1]) + 2, 10 + 2);
+		g.setColor(Color.RED);
+		g.fillRect(50, screenH - 100, (cooldown[1] - cooldown[0]) * (200 / cooldown[1]), 10);
 	}
 
 	public static void main(String[] arg) {
@@ -123,10 +140,10 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 			break;
 		case 32: // space
 			// was 68, not 60
-			if (cooldown == 0) {
+			if (cooldown[0] == 0) {
 				blasts.add(new Blast(player.getX() + 11, player.getY() + 60, 0));
 				blasts.add(new Blast(player.getX() + 115, player.getY() + 60, 0));
-				cooldown = 10;
+				cooldown[0] = cooldown[1];
 			}
 
 			break;
@@ -148,7 +165,7 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 
 	public void mouseClicked(MouseEvent arg0) {
 //		System.out.println(player);
-		System.out.println(arg0.getX() + ", " + arg0.getY());
+		System.out.println(arg0);
 	}
 
 	public void mouseEntered(MouseEvent arg0) {
