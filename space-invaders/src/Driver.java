@@ -24,6 +24,9 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 
 	int[] cooldown = { 0, 50 };
 
+	int kills = 0;
+	int lives = 3;
+
 	public void paint(Graphics g) {
 		g.fillRect(0, 0, screenW, screenH);
 
@@ -34,6 +37,7 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 				i--;
 			}
 		}
+
 		for (int i = 0; i < aBlasts.size(); i++) {
 			if (aBlasts.get(i).getY() > screenH + 50) {
 				aBlasts.remove(i);
@@ -49,7 +53,9 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 					Blast b = blasts.get(i);
 					if (b.hit(a)) {
 						blasts.remove(i);
-						a.setVisible(false);
+//						a.setVisible(false);
+						a.setY(-500);
+						kills++;
 						i--;
 					}
 				}
@@ -98,6 +104,11 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 		g.fillRect(50 - 1, screenH - 100 - 1, cooldown[1] * (200 / cooldown[1]) + 2, 10 + 2);
 		g.setColor(Color.RED);
 		g.fillRect(50, screenH - 100, (cooldown[1] - cooldown[0]) * (200 / cooldown[1]), 10);
+
+		for (int i = 0; i < kills; i++) {
+			StillAlien temp = new StillAlien(280 + 10 * i, 980, 1);
+			temp.paint(g);
+		}
 	}
 
 	public static void main(String[] arg) {

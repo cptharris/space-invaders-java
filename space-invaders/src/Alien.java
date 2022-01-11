@@ -3,12 +3,15 @@ public class Alien extends FlyingObj {
 	private int version;
 	private int type;
 
+	public Alien() {
+		this(100, 100, 0);
+	}
+
 	public Alien(int x, int y, int type) {
 		super(x, y, "alien" + type + "0.png", 0.05);
 		this.type = type;
 		direction = 1;
 		version = 0;
-
 	}
 
 	public void move() {
@@ -32,6 +35,22 @@ public class Alien extends FlyingObj {
 		return (int) (Math.random() * (i) + 1) > i - 1;
 	}
 
+}
+
+class StillAlien extends Alien {
+
+	public StillAlien(int x, int y, int type) {
+		super(x, y, type);
+		scaleSize = 0.01;
+		init(x, y);
+	}
+
+	public void move() {
+	}
+
+	public boolean shoot() {
+		return false;
+	}
 }
 
 /*
