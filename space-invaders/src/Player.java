@@ -13,7 +13,7 @@ public class Player extends FlyingObj {
 			x = oX - range;
 		}
 
-		x += vx * 15;
+		x += vx * 25;
 	}
 
 	public void motion(int key) {

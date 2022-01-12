@@ -1,13 +1,12 @@
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.net.URL;
 import java.awt.Toolkit;
 import java.util.ArrayList;
 
@@ -28,6 +27,15 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 	int lives = 3;
 
 	public void paint(Graphics g) {
+		if (lives <= 0) {
+			g.setColor(Color.BLACK);
+			g.fillRect(0, 0, screenW, screenH);
+
+			g.setColor(Color.WHITE);
+			g.setFont(new Font("Dialog", Font.PLAIN, 50));
+			g.drawString("Game Over", screenW / 2 - 150, screenH / 2);
+			return;
+		}
 		g.fillRect(0, 0, screenW, screenH);
 
 		// removes blasts outside of screen
@@ -44,6 +52,28 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 				i--;
 			}
 		}
+
+		// paint aliens
+		for (Alien[] a1 : aliens) {
+			for (Alien a : a1) {
+				if (a.shoot()) {
+					aBlasts.add(new Blast(a.getX() + 40, a.getY() + 55, 1)); // alien center is +40,+55
+				}
+				a.paint(g);
+			}
+		}
+
+		// paint player blasts
+		for (Blast b : blasts) {
+			b.paint(g);
+		}
+
+		// paint alien blasts
+		for (Blast b : aBlasts) {
+			b.paint(g);
+		}
+
+		player.paint(g);
 
 		// compare every alien with every blast
 		for (int r = 0; r < aliens.length; r++) {
@@ -68,46 +98,30 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 			if (b.hit(player)) {
 				aBlasts.remove(i);
 				// remove hearts/end game
-				System.out.println("player hit");
+				lives--;
 				i--;
 			}
 		}
-
-		// paint aliens
-		for (Alien[] a1 : aliens) {
-			for (Alien a : a1) {
-				if (a.shoot()) {
-					// alien center is +40,+55
-					aBlasts.add(new Blast(a.getX() + 40, a.getY() + 55, 1));
-				}
-				a.paint(g);
-			}
-		}
-
-		// paint player blasts
-		for (Blast b : blasts) {
-			b.paint(g);
-		}
-
-		// paint alien blasts
-		for (Blast b : aBlasts) {
-			b.paint(g);
-		}
-
-		player.paint(g);
 
 		if (cooldown[0] > 0) {
 			cooldown[0]--;
 		}
 
+		// cooldown bar
 		g.setColor(new Color(130, 130, 130));
 		g.fillRect(50 - 1, screenH - 100 - 1, cooldown[1] * (200 / cooldown[1]) + 2, 10 + 2);
 		g.setColor(Color.RED);
 		g.fillRect(50, screenH - 100, (cooldown[1] - cooldown[0]) * (200 / cooldown[1]), 10);
 
+		// kill bar
 		for (int i = 0; i < kills; i++) {
-			StillAlien temp = new StillAlien(280 + 10 * i, 980, 1);
+			StillAlien temp = new StillAlien(280 + 10 * (i % 20), 980, 1);
 			temp.paint(g);
+		}
+
+		g.setColor(Color.BLUE);
+		for (int i = 0; i < lives; i++) {
+			g.drawOval(1700 + 20 * i, 980, 10, 10);
 		}
 	}
 

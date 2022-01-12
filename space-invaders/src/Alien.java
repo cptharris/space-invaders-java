@@ -19,7 +19,7 @@ public class Alien extends FlyingObj {
 			direction *= -1;
 			y += 20;
 		}
-		x += 10 * direction;
+		x += 20 * direction;
 		version++;
 		if (version > 3) {
 			version = 0;
@@ -28,10 +28,10 @@ public class Alien extends FlyingObj {
 	}
 
 	public boolean shoot() {
-		if (!visible) {
+		if (!visible || y < -10) {
 			return false;
 		}
-		int i = 500;
+		int i = 400;
 		return (int) (Math.random() * (i) + 1) > i - 1;
 	}
 

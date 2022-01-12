@@ -7,15 +7,16 @@ public class Blast extends FlyingObj {
 	}
 
 	public void move() {
+		int v = 20;
 		if (type == 0) {
-			y -= 10;
+			y -= v;
 		} else if (type == 1) {
-			y += 10;
+			y += v;
 		}
 	}
 
 	public boolean hit(FlyingObj obj) {
-		if (!obj.visible || !visible) {
+		if (!obj.visible || !visible || obj.y < -10) {
 			return false;
 		}
 
@@ -24,10 +25,10 @@ public class Blast extends FlyingObj {
 		double objW = obj.width;
 		double objH = obj.height;
 
-		if (objX < this.x) {
-			if (objY < this.y) {
-				if (objX + objW > this.x) {
-					if (objY + objH > this.y) {
+		if (objX - 5 < this.x) {
+			if (objY - 5 < this.y) {
+				if (objX + objW + 5 > this.x) {
+					if (objY + objH + 5 > this.y) {
 						return true;
 					}
 				}
