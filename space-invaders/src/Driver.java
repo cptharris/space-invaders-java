@@ -20,6 +20,7 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 	Player player = new Player(screenW / 2, screenH - 280);
 	ArrayList<Blast> blasts = new ArrayList<Blast>();
 	ArrayList<Blast> aBlasts = new ArrayList<Blast>();
+	ArrayList<Reward> rewards = new ArrayList<Reward>();
 
 	int[] cooldown = { 0, 50 };
 
@@ -27,6 +28,7 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 	int lives = 3;
 
 	public void paint(Graphics g) {
+		// END SCREEN
 		if (lives <= 0) {
 			g.setColor(Color.BLACK);
 			g.fillRect(0, 0, screenW, screenH);
@@ -53,6 +55,14 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 			}
 		}
 
+		// removes rewards outside of screen
+		for (int i = 0; i < rewards.size(); i++) {
+			if (rewards.get(i).getX() > screenW + 50) {
+				rewards.remove(i);
+				i--;
+			}
+		}
+
 		// paint aliens
 		for (Alien[] a1 : aliens) {
 			for (Alien a : a1) {
@@ -75,7 +85,7 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 
 		player.paint(g);
 
-		// compare every alien with every blast
+		// compare every alien with every player blast
 		for (int r = 0; r < aliens.length; r++) {
 			for (int c = 0; c < aliens[r].length; c++) {
 				Alien a = aliens[r][c];
@@ -83,8 +93,8 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 					Blast b = blasts.get(i);
 					if (b.hit(a)) {
 						blasts.remove(i);
-//						a.setVisible(false);
-						a.setY(-500);
+						// max = 750, min = 250
+						a.setY(-1 * ((int) (Math.random() * 501) + 250));
 						kills++;
 						i--;
 					}
@@ -173,7 +183,7 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 
 			break;
 		default:
-//			System.out.println("Unrecognized, key code: " + arg0.getKeyCode());
+			// System.out.println("Unrecognized, key code: " + arg0.getKeyCode());
 			break;
 		}
 	}
@@ -191,6 +201,7 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 	public void mouseClicked(MouseEvent arg0) {
 //		System.out.println(player);
 		System.out.println(arg0);
+		rewards.add(new Reward());
 	}
 
 	public void mouseEntered(MouseEvent arg0) {

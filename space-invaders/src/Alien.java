@@ -35,6 +35,24 @@ public class Alien extends FlyingObj {
 		return (int) (Math.random() * (i) + 1) > i - 1;
 	}
 
+	public boolean overlaping(Alien a) {
+		if (!visible || !a.visible) {
+			return false;
+		}
+
+		if (x - 5 < a.x) {
+			if (x - 5 < a.y) {
+				if (x + width + 5 > a.x) {
+					if (x + height + 5 > a.y) {
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
 }
 
 class StillAlien extends Alien {
