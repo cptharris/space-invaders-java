@@ -15,7 +15,6 @@ public class FlyingObj {
 	protected double width, height;
 
 	protected int range;
-	protected boolean visible;
 
 	public FlyingObj(int x, int y, String fileName, double scaleSize) {
 		this.scaleSize = scaleSize;
@@ -26,7 +25,6 @@ public class FlyingObj {
 		init(x, y);
 
 		range = 650;
-		visible = true;
 	}
 
 	public void changePicture(String fileName) {
@@ -35,9 +33,6 @@ public class FlyingObj {
 	}
 
 	public void paint(Graphics g) {
-		if (!visible) {
-			return;
-		}
 		width = img.getWidth(null) * scaleSize;
 		height = img.getHeight(null) * scaleSize;
 
@@ -96,13 +91,4 @@ public class FlyingObj {
 	public void setY(int y) {
 		this.y = y;
 	}
-
-	public boolean isVisible() {
-		return visible;
-	}
-
-	public void setVisible(boolean visible) {
-		this.visible = visible;
-	}
-
 }

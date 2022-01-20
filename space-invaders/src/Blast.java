@@ -1,9 +1,15 @@
 public class Blast extends FlyingObj {
 	private int type;
+	private boolean explosive;
 
 	public Blast(int x, int y, int type) {
+		this(x, y, type, false);
+	}
+
+	public Blast(int x, int y, int type, boolean explosive) {
 		super(x - 10, y - 30, "blast" + type + ".png", 0.05);
 		this.type = type;
+		this.explosive = explosive;
 	}
 
 	public void move() {
@@ -16,7 +22,7 @@ public class Blast extends FlyingObj {
 	}
 
 	public boolean hit(FlyingObj obj) {
-		if (!obj.visible || !visible || obj.y < -10) {
+		if (obj.y < -10) {
 			return false;
 		}
 
@@ -36,5 +42,9 @@ public class Blast extends FlyingObj {
 		}
 
 		return false;
+	}
+
+	public boolean isExplosive() {
+		return explosive;
 	}
 }

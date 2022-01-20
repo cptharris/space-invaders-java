@@ -27,8 +27,13 @@ public class Alien extends FlyingObj {
 		changePicture("alien" + type + version + ".png");
 	}
 
+	public void respawn() {
+		// max = 750, min = 250
+		y = -1 * ((int) (Math.random() * 501) + 250);
+	}
+
 	public boolean shoot() {
-		if (!visible || y < -10) {
+		if (y < -10) {
 			return false;
 		}
 		int i = 400;
@@ -36,10 +41,6 @@ public class Alien extends FlyingObj {
 	}
 
 	public boolean overlaping(Alien a) {
-		if (!visible || !a.visible) {
-			return false;
-		}
-
 		if (x - 5 < a.x) {
 			if (x - 5 < a.y) {
 				if (x + width + 5 > a.x) {

@@ -20,14 +20,23 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 	Player player = new Player(screenW / 2, screenH - 280);
 	ArrayList<Blast> blasts = new ArrayList<Blast>();
 	ArrayList<Blast> aBlasts = new ArrayList<Blast>();
-	ArrayList<Reward> rewards = new ArrayList<Reward>();
+	ArrayList<Bomb> bombs = new ArrayList<Bomb>();
 
 	int[] cooldown = { 0, 50 };
 
 	int kills = 0;
 	int lives = 3;
+	boolean isBomb = false;
+
+	double count = 0;
 
 	public void paint(Graphics g) {
+		count++;
+		if (count / 1000 == 1) {
+			count = 0;
+			bombs.add(new Bomb("bomb.png", 0.5));
+		}
+
 		// END SCREEN
 		if (lives <= 0) {
 			g.setColor(Color.BLACK);
@@ -56,11 +65,16 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 		}
 
 		// removes rewards outside of screen
-		for (int i = 0; i < rewards.size(); i++) {
-			if (rewards.get(i).getX() > screenW + 50) {
-				rewards.remove(i);
+		for (int i = 0; i < bombs.size(); i++) {
+			if (bombs.get(i).getX() > screenW + 50) {
+				bombs.remove(i);
 				i--;
 			}
+		}
+
+		// paint rewards
+		for (Bomb r : bombs) {
+			r.paint(g);
 		}
 
 		// paint aliens
@@ -92,12 +106,29 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 				for (int i = 0; i < blasts.size(); i++) {
 					Blast b = blasts.get(i);
 					if (b.hit(a)) {
+						if (b.isExplosive()) {
+							explosionRadius(aliens, b);
+						}
 						blasts.remove(i);
-						// max = 750, min = 250
-						a.setY(-1 * ((int) (Math.random() * 501) + 250));
+						a.respawn();
 						kills++;
 						i--;
+						isBomb = false;
 					}
+				}
+			}
+		}
+
+		// compare every reward with every blast
+		for (int i = 0; i < blasts.size(); i++) {
+			Blast b = blasts.get(i);
+			for (int x = 0; x < bombs.size(); x++) {
+				if (b.hit(bombs.get(x))) {
+					blasts.remove(i);
+					bombs.remove(x);
+					isBomb = true;
+					x--;
+					i--;
 				}
 			}
 		}
@@ -132,6 +163,19 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 		g.setColor(Color.BLUE);
 		for (int i = 0; i < lives; i++) {
 			g.drawOval(1700 + 20 * i, 980, 10, 10);
+		}
+	}
+
+	public void explosionRadius(Alien[][] aliens, Blast b) {
+		for (int r = 0; r < aliens.length; r++) {
+			for (int c = 0; c < aliens[r].length; c++) {
+				System.out.println(Math.sqrt(
+						Math.pow(aliens[r][c].getX() - b.getX(), 2) + Math.pow(aliens[r][c].getY() - b.getY(), 2)));
+				if (Math.sqrt(Math.pow(aliens[r][c].getX() - b.getX(), 2)
+						+ Math.pow(aliens[r][c].getY() - b.getY(), 2)) < 100) {
+					aliens[r][c].respawn();
+				}
+			}
 		}
 	}
 
@@ -176,8 +220,8 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 		case 32: // space
 			// was 68, not 60
 			if (cooldown[0] == 0) {
-				blasts.add(new Blast(player.getX() + 11, player.getY() + 60, 0));
-				blasts.add(new Blast(player.getX() + 115, player.getY() + 60, 0));
+				blasts.add(new Blast(player.getX() + 11, player.getY() + 60, 0, isBomb));
+				blasts.add(new Blast(player.getX() + 115, player.getY() + 60, 0, isBomb));
 				cooldown[0] = cooldown[1];
 			}
 
@@ -201,7 +245,6 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 	public void mouseClicked(MouseEvent arg0) {
 //		System.out.println(player);
 		System.out.println(arg0);
-		rewards.add(new Reward());
 	}
 
 	public void mouseEntered(MouseEvent arg0) {
