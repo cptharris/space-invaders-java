@@ -1,9 +1,11 @@
 public class Player extends FlyingObj {
 	private int vx;
+	private int hits;
 
 	public Player(int x, int y) {
 		super(x, y, "xwing.png", 0.2);
 		range += 50;
+		hits = 0;
 	}
 
 	public void move() {
@@ -14,6 +16,10 @@ public class Player extends FlyingObj {
 		}
 
 		x += vx * 25;
+
+		if (hits > 0) {
+			changePicture("xwing-d" + hits % 5 + ".png");
+		}
 	}
 
 	public void motion(int key) {
@@ -22,6 +28,9 @@ public class Player extends FlyingObj {
 		 */
 
 		vx = key;
+	}
 
+	public void hit() {
+		hits++;
 	}
 }

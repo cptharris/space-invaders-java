@@ -15,15 +15,20 @@ public class Alien extends FlyingObj {
 	}
 
 	public void move() {
+		// change direction and go down when reaches edge of range
 		if (Math.abs(x - oX) > range) {
 			direction *= -1;
 			y += 20;
 		}
+		// go left/right
 		x += 20 * direction;
+
+		// toggle through versions of alien type
 		version++;
 		if (version > 3) {
 			version = 0;
 		}
+		// update picture
 		changePicture("alien" + type + version + ".png");
 	}
 
