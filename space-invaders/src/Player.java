@@ -18,7 +18,7 @@ public class Player extends FlyingObj {
 		x += vx * 25;
 
 		if (hits > 0) {
-			changePicture("xwing-d" + hits % 5 + ".png");
+			changePicture("xwing-d" + (hits % 6 - 1) + ".png");
 		}
 	}
 

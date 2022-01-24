@@ -2,6 +2,7 @@ public class Alien extends FlyingObj {
 	private int direction;
 	private int version;
 	private int type;
+	private int health;
 
 	public Alien() {
 		this(100, 100, 0);
@@ -12,6 +13,7 @@ public class Alien extends FlyingObj {
 		this.type = type;
 		direction = 1;
 		version = 0;
+		health = 100;
 	}
 
 	public void move() {

@@ -20,27 +20,32 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 	Player player = new Player(screenW / 2, screenH - 280);
 	ArrayList<Blast> blasts = new ArrayList<Blast>();
 	ArrayList<Blast> aBlasts = new ArrayList<Blast>();
-	ArrayList<Ammo> ammos = new ArrayList<Ammo>();
+	ArrayList<Reward> rewards = new ArrayList<Reward>();
 
 	int[] cooldown = { 0, 50 };
 
 	int kills = 0;
 	int lives = 5;
+	int shotsFired = 0;
 
 	double count = 0;
-	boolean playing = false;
+	boolean playing = true;
 
 	public void paint(Graphics g) {
 		if (!playing) {
 			g.setColor(Color.BLACK);
 			g.fillRect(0, 0, screenW, screenH);
-			playing = true;
 		}
 
 		count++;
-		if (count / 500 == 1) {
+		if (count / 400 == 1) {
 			count = 0;
-			ammos.add(new Ammo());
+			if (Math.random() > 0.5) {
+				rewards.add(new Ammo());
+			} else {
+				rewards.add(new Heart());
+			}
+
 		}
 
 		// END SCREEN
@@ -71,15 +76,15 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 		}
 
 		// removes rewards outside of screen
-		for (int i = 0; i < ammos.size(); i++) {
-			if (ammos.get(i).getX() > screenW + 50) {
-				ammos.remove(i);
+		for (int i = 0; i < rewards.size(); i++) {
+			if (rewards.get(i).getX() > screenW + 50) {
+				rewards.remove(i);
 				i--;
 			}
 		}
 
 		// paint rewards
-		for (Ammo r : ammos) {
+		for (Reward r : rewards) {
 			r.paint(g);
 		}
 
@@ -121,18 +126,22 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 			}
 		}
 
-		// compare every ammo box with every blast
+		// compare every reward with every blast
 		for (int i = 0; i < blasts.size(); i++) {
 			Blast b = blasts.get(i);
-			for (int x = 0; x < ammos.size(); x++) {
-				if (b.hit(ammos.get(x))) {
+			for (int x = 0; x < rewards.size(); x++) {
+				if (b.hit(rewards.get(x))) {
+					if (rewards.get(x).getClass().toString().equals("class Ammo")) {
+						if (cooldown[1] > 5) {
+							cooldown[1] /= 2;
+						}
+					} else if (rewards.get(x).getClass().toString().equals("class Heart")) {
+						lives++;
+					}
 					blasts.remove(i);
-					ammos.remove(x);
+					rewards.remove(x);
 					x--;
 					i--;
-					if (cooldown[1] > 5) {
-						cooldown[1] /= 2;
-					}
 				}
 			}
 		}
@@ -215,6 +224,7 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 				blasts.add(new Blast(player.getX() + 11, player.getY() + 60, 0));
 				blasts.add(new Blast(player.getX() + 115, player.getY() + 60, 0));
 				cooldown[0] = cooldown[1];
+				shotsFired += 2;
 			}
 
 			break;
@@ -240,11 +250,11 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 	}
 
 	public void mouseEntered(MouseEvent arg0) {
-
+		playing = true;
 	}
 
 	public void mouseExited(MouseEvent arg0) {
-
+		playing = false;
 	}
 
 	public void mousePressed(MouseEvent arg0) {
