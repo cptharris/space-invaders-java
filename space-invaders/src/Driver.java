@@ -21,6 +21,7 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 	ArrayList<Blast> blasts = new ArrayList<Blast>();
 	ArrayList<Blast> aBlasts = new ArrayList<Blast>();
 	ArrayList<Reward> rewards = new ArrayList<Reward>();
+	ArrayList<Explosion> explosions = new ArrayList<Explosion>();
 
 	int[] cooldown = { 0, 50 };
 
@@ -32,10 +33,21 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 	boolean playing = true;
 
 	public void paint(Graphics g) {
-		if (!playing) {
-			g.setColor(Color.BLACK);
-			g.fillRect(0, 0, screenW, screenH);
+		g.setColor(Color.BLACK);
+		g.fillRect(0, 0, screenW, screenH);
+		// END SCREEN
+		if (lives <= 0) {
+			g.setColor(Color.WHITE);
+			g.setFont(new Font("Dialog", Font.PLAIN, 50));
+			g.drawString("Game Over", screenW / 2 - 150, screenH / 2);
+			return;
 		}
+
+		if (!playing) {
+			return;
+		}
+
+		g.setFont(new Font("Dialog", Font.PLAIN, 20));
 
 		count++;
 		if (count / 400 == 1) {
@@ -45,20 +57,15 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 			} else {
 				rewards.add(new Heart());
 			}
-
 		}
 
-		// END SCREEN
-		if (lives <= 0) {
-			g.setColor(Color.BLACK);
-			g.fillRect(0, 0, screenW, screenH);
-
-			g.setColor(Color.WHITE);
-			g.setFont(new Font("Dialog", Font.PLAIN, 50));
-			g.drawString("Game Over", screenW / 2 - 150, screenH / 2);
-			return;
+		// removes expired explosion
+		for (int i = 0; i < explosions.size(); i++) {
+			if (explosions.get(i).time() <= 0) {
+				explosions.remove(i);
+				i--;
+			}
 		}
-		g.fillRect(0, 0, screenW, screenH);
 
 		// removes blasts outside of screen
 		for (int i = 0; i < blasts.size(); i++) {
@@ -81,6 +88,11 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 				rewards.remove(i);
 				i--;
 			}
+		}
+
+		// paint rewards
+		for (Explosion e : explosions) {
+			e.paint(g);
 		}
 
 		// paint rewards
@@ -117,6 +129,7 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 				for (int i = 0; i < blasts.size(); i++) {
 					Blast b = blasts.get(i);
 					if (b.hit(a)) {
+						explosions.add(new Explosion(a));
 						blasts.remove(i);
 						a.respawn();
 						kills++;
@@ -169,10 +182,7 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 		g.fillRect(50, screenH - 100, (cooldown[1] - cooldown[0]) * (200 / cooldown[1]), 10);
 
 		// kill bar
-		for (int i = 0; i < kills; i++) {
-			StillAlien temp = new StillAlien(280 + 10 * (i % 20), 980, 1);
-			temp.paint(g);
-		}
+		g.drawString(kills + "", 280, 980);
 
 		g.setColor(Color.BLUE);
 		for (int i = 0; i < lives; i++) {
