@@ -23,6 +23,8 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 	ArrayList<Reward> rewards = new ArrayList<Reward>();
 	ArrayList<Explosion> explosions = new ArrayList<Explosion>();
 
+	Audio explosionSound = new Audio("explosion.wav", false);
+
 	int[] cooldown = { 0, 50 };
 
 	int kills = 0;
@@ -31,12 +33,13 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 
 	double count = 0;
 	boolean playing = true;
+	boolean gameOver = false;
 
 	public void paint(Graphics g) {
 		g.setColor(Color.BLACK);
 		g.fillRect(0, 0, screenW, screenH);
 		// END SCREEN
-		if (lives <= 0) {
+		if (lives <= 0 || gameOver) {
 			g.setColor(Color.WHITE);
 			g.setFont(new Font("Dialog", Font.PLAIN, 50));
 			g.drawString("Game Over", screenW / 2 - 150, screenH / 2);
@@ -103,6 +106,11 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 		// paint aliens
 		for (Alien[] a1 : aliens) {
 			for (Alien a : a1) {
+				if (a.getY() > screenH + 10) {
+					explosionSound.play();
+					explosionSound.play();
+					gameOver = true;
+				}
 				if (a.shoot()) {
 					aBlasts.add(new Blast(a.getX() + 40, a.getY() + 55, 1)); // alien center is +40,+55
 				}
@@ -120,6 +128,13 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 			b.paint(g);
 		}
 
+		if (cooldown[0] == 0 && player.isShooting()) {
+			blasts.add(new Blast(player.getX() + 11, player.getY() + 60, 0));
+			blasts.add(new Blast(player.getX() + 115, player.getY() + 60, 0));
+			cooldown[0] = cooldown[1];
+			shotsFired += 2;
+		}
+
 		player.paint(g);
 
 		// compare every alien with every player blast
@@ -130,6 +145,7 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 					Blast b = blasts.get(i);
 					if (b.hit(a)) {
 						explosions.add(new Explosion(a));
+						explosionSound.play();
 						blasts.remove(i);
 						a.respawn();
 						kills++;
@@ -230,13 +246,7 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 			break;
 		case 32: // space
 			// was 68, not 60
-			if (cooldown[0] == 0) {
-				blasts.add(new Blast(player.getX() + 11, player.getY() + 60, 0));
-				blasts.add(new Blast(player.getX() + 115, player.getY() + 60, 0));
-				cooldown[0] = cooldown[1];
-				shotsFired += 2;
-			}
-
+			player.setShooting(true);
 			break;
 		default:
 			// System.out.println("Unrecognized, key code: " + arg0.getKeyCode());
@@ -245,8 +255,18 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 	}
 
 	public void keyReleased(KeyEvent arg0) {
-		if (arg0.getKeyCode() == 37 || arg0.getKeyCode() == 39) {
+		switch (arg0.getKeyCode()) {
+		case 37: // left
 			player.motion(0);
+			break;
+		case 39: // right
+			player.motion(0);
+			break;
+		case 32: // space
+			player.setShooting(false);
+			break;
+		default:
+			break;
 		}
 	}
 

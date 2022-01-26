@@ -1,5 +1,5 @@
 public class Blast extends FlyingObj {
-	private int type;
+	protected int type;
 
 	public Blast(int x, int y, int type) {
 		super(x - 10, y - 30, "blast" + type + ".png", 0.05);

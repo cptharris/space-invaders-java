@@ -2,6 +2,8 @@ public class Alien extends FlyingObj {
 	private int direction;
 	private int version;
 	private int type;
+	private int vx;
+	private int shotChance = 400;
 
 	public Alien() {
 		this(100, 100, 0);
@@ -12,6 +14,7 @@ public class Alien extends FlyingObj {
 		this.type = type;
 		direction = 1;
 		version = 0;
+		vx = 20;
 	}
 
 	public void move() {
@@ -21,7 +24,7 @@ public class Alien extends FlyingObj {
 			y += 20;
 		}
 		// go left/right
-		x += 20 * direction;
+		x += vx * direction;
 
 		// toggle through versions of alien type
 		version++;
@@ -35,14 +38,15 @@ public class Alien extends FlyingObj {
 	public void respawn() {
 		// max = 750, min = 250
 		y = -1 * ((int) (Math.random() * 501) + 250);
+		vx++;
+		shotChance -= 10;
 	}
 
 	public boolean shoot() {
 		if (y < -10) {
 			return false;
 		}
-		int i = 400;
-		return (int) (Math.random() * (i) + 1) > i - 1;
+		return (int) (Math.random() * (shotChance) + 1) > shotChance - 1;
 	}
 
 }
