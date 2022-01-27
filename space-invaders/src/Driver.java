@@ -22,24 +22,21 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 	ArrayList<Blast> aBlasts = new ArrayList<Blast>();
 	ArrayList<Reward> rewards = new ArrayList<Reward>();
 	ArrayList<Explosion> explosions = new ArrayList<Explosion>();
+	ArrayList<Message> messages = new ArrayList<Message>();
 
 	Audio explosionSound = new Audio("explosion.wav", false);
 
-	int[] cooldown = { 0, 50 };
-
-	int kills = 0;
-	int lives = 5;
-	int shotsFired = 0;
-
-	double count = 0;
+	double rewardTimer = 0;
 	boolean playing = true;
 	boolean gameOver = false;
+
+	int messageY = 0;
 
 	public void paint(Graphics g) {
 		g.setColor(Color.BLACK);
 		g.fillRect(0, 0, screenW, screenH);
 		// END SCREEN
-		if (lives <= 0 || gameOver) {
+		if (player.getLives() <= 0 || gameOver) {
 			g.setColor(Color.WHITE);
 			g.setFont(new Font("Dialog", Font.PLAIN, 50));
 			g.drawString("Game Over", screenW / 2 - 150, screenH / 2);
@@ -52,9 +49,9 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 
 		g.setFont(new Font("Dialog", Font.PLAIN, 20));
 
-		count++;
-		if (count / 400 == 1) {
-			count = 0;
+		rewardTimer++;
+		if (rewardTimer / 400 == 1) {
+			rewardTimer = 0;
 			if (Math.random() > 0.5) {
 				rewards.add(new Ammo());
 			} else {
@@ -62,7 +59,40 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 			}
 		}
 
-		// removes expired explosion
+		removals();
+
+		paints(g);
+
+		comparisons();
+
+		// cooldown bar
+		g.setColor(new Color(130, 130, 130));
+		g.fillRect(50 - 1, screenH - 100 - 1, player.getCooldown()[1] * (200 / player.getCooldown()[1]) + 2, 10 + 2);
+		g.setColor(Color.BLUE);
+		g.fillRect(50, screenH - 100,
+				(player.getCooldown()[1] - player.getCooldown()[0]) * (200 / player.getCooldown()[1]), 10);
+
+		// kill bar
+		g.setColor(Color.GREEN);
+		g.drawString(player.getKills() + "", 1610, 990);
+
+		g.setColor(Color.RED);
+		for (int i = 0; i < player.getLives(); i++) {
+			g.drawOval(1700 + 20 * i, 980, 10, 10);
+		}
+	}
+
+	private void removals() {
+
+		// removes expired explosions
+		for (int i = 0; i < messages.size(); i++) {
+			if (messages.get(i).time() <= 0) {
+				messages.remove(i);
+				i--;
+			}
+		}
+
+		// removes expired explosions
 		for (int i = 0; i < explosions.size(); i++) {
 			if (explosions.get(i).time() <= 0) {
 				explosions.remove(i);
@@ -77,7 +107,6 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 				i--;
 			}
 		}
-
 		for (int i = 0; i < aBlasts.size(); i++) {
 			if (aBlasts.get(i).getY() > screenH + 50) {
 				aBlasts.remove(i);
@@ -92,8 +121,18 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 				i--;
 			}
 		}
+	}
 
-		// paint rewards
+	private void paints(Graphics g) {
+		// paint messages
+		g.setColor(Color.WHITE);
+		for (int i = 0; i < messages.size(); i++) {
+			g.setColor(messages.get(i).color());
+			g.drawString(messages.get(i).message(), 10, 20 + 20 * i);
+			messages.get(i).incTime();
+		}
+
+		// paint explosions
 		for (Explosion e : explosions) {
 			e.paint(g);
 		}
@@ -128,15 +167,16 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 			b.paint(g);
 		}
 
-		if (cooldown[0] == 0 && player.isShooting()) {
+		if (player.shoot()) {
 			blasts.add(new Blast(player.getX() + 11, player.getY() + 60, 0));
 			blasts.add(new Blast(player.getX() + 115, player.getY() + 60, 0));
-			cooldown[0] = cooldown[1];
-			shotsFired += 2;
+			player.incShotsFired();
 		}
 
 		player.paint(g);
+	}
 
+	private void comparisons() {
 		// compare every alien with every player blast
 		for (int r = 0; r < aliens.length; r++) {
 			for (int c = 0; c < aliens[r].length; c++) {
@@ -148,7 +188,9 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 						explosionSound.play();
 						blasts.remove(i);
 						a.respawn();
-						kills++;
+						player.incKills();
+
+						messages.add(new Message("Alien destroyed", Color.BLUE));
 						i--;
 					}
 				}
@@ -161,11 +203,11 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 			for (int x = 0; x < rewards.size(); x++) {
 				if (b.hit(rewards.get(x))) {
 					if (rewards.get(x).getClass().toString().equals("class Ammo")) {
-						if (cooldown[1] > 5) {
-							cooldown[1] /= 2;
-						}
+						player.decreaseCooldown();
+						messages.add(new Message("Reload decreased to " + player.getCooldown()[1], Color.GREEN));
 					} else if (rewards.get(x).getClass().toString().equals("class Heart")) {
-						lives++;
+						player.incLives(1);
+						messages.add(new Message("Health increased", Color.GREEN));
 					}
 					blasts.remove(i);
 					rewards.remove(x);
@@ -181,28 +223,11 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 			if (b.hit(player)) {
 				aBlasts.remove(i);
 				// remove hearts/end game
-				lives--;
+				player.incLives(-1);
 				player.hit();
+				messages.add(new Message("Player hit", Color.RED));
 				i--;
 			}
-		}
-
-		if (cooldown[0] > 0) {
-			cooldown[0]--;
-		}
-
-		// cooldown bar
-		g.setColor(new Color(130, 130, 130));
-		g.fillRect(50 - 1, screenH - 100 - 1, cooldown[1] * (200 / cooldown[1]) + 2, 10 + 2);
-		g.setColor(Color.RED);
-		g.fillRect(50, screenH - 100, (cooldown[1] - cooldown[0]) * (200 / cooldown[1]), 10);
-
-		// kill bar
-		g.drawString(kills + "", 280, 980);
-
-		g.setColor(Color.BLUE);
-		for (int i = 0; i < lives; i++) {
-			g.drawOval(1700 + 20 * i, 980, 10, 10);
 		}
 	}
 
@@ -257,10 +282,14 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 	public void keyReleased(KeyEvent arg0) {
 		switch (arg0.getKeyCode()) {
 		case 37: // left
-			player.motion(0);
+			if (player.vx() == -1) {
+				player.motion(0);
+			}
 			break;
 		case 39: // right
-			player.motion(0);
+			if (player.vx() == 1) {
+				player.motion(0);
+			}
 			break;
 		case 32: // space
 			player.setShooting(false);
@@ -275,7 +304,6 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 	}
 
 	public void mouseClicked(MouseEvent arg0) {
-//		System.out.println(player);
 		System.out.println(arg0);
 	}
 
