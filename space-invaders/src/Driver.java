@@ -16,27 +16,25 @@ import javax.swing.Timer;
 
 public class Driver extends JPanel implements ActionListener, KeyListener, MouseListener {
 	public int screenW = 1920, screenH = 1080;
-	Alien[][] aliens = new Alien[6][4];
-	Player player = new Player(screenW / 2, screenH - 280);
-	ArrayList<Blast> blasts = new ArrayList<Blast>();
-	ArrayList<Blast> aBlasts = new ArrayList<Blast>();
-	ArrayList<Reward> rewards = new ArrayList<Reward>();
-	ArrayList<Explosion> explosions = new ArrayList<Explosion>();
-	ArrayList<Message> messages = new ArrayList<Message>();
+	Alien[][] aliens;
+	Player player;
+	ArrayList<Blast> blasts, aBlasts;
+	ArrayList<Reward> rewards;
+	ArrayList<Explosion> explosions;
+	ArrayList<Message> messages;
+	ArrayList<Boss> bosses;
 
-	Audio explosionSound = new Audio("explosion.wav", false);
+	Audio explosionSound;
 
-	double rewardTimer = 0;
-	boolean playing = true;
-	boolean gameOver = false;
-
-	int messageY = 0;
+	int rewardTimer;
+	boolean playing, gameOver;
+	boolean bossFight;
 
 	public void paint(Graphics g) {
 		g.setColor(Color.BLACK);
 		g.fillRect(0, 0, screenW, screenH);
 		// END SCREEN
-		if (player.getLives() <= 0 || gameOver) {
+		if (player.lives() <= 0 || gameOver) {
 			g.setColor(Color.WHITE);
 			g.setFont(new Font("Dialog", Font.PLAIN, 50));
 			g.drawString("Game Over", screenW / 2 - 150, screenH / 2);
@@ -47,6 +45,13 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 			return;
 		}
 
+		bossFight = true;
+		try {
+			bosses.get(0);
+		} catch (Exception e) {
+			bossFight = false;
+		}
+
 		g.setFont(new Font("Dialog", Font.PLAIN, 20));
 
 		rewardTimer++;
@@ -55,7 +60,9 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 			if (Math.random() > 0.5) {
 				rewards.add(new Ammo());
 			} else {
-				rewards.add(new Heart());
+				if (player.lives() < 10) {
+					rewards.add(new Heart());
+				}
 			}
 		}
 
@@ -77,7 +84,7 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 		g.drawString(player.getKills() + "", 1610, 990);
 
 		g.setColor(Color.RED);
-		for (int i = 0; i < player.getLives(); i++) {
+		for (int i = 0; i < player.lives(); i++) {
 			g.drawOval(1700 + 20 * i, 980, 10, 10);
 		}
 	}
@@ -102,13 +109,13 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 
 		// removes blasts outside of screen
 		for (int i = 0; i < blasts.size(); i++) {
-			if (blasts.get(i).getY() < -50) {
+			if (blasts.get(i).y() < -50) {
 				blasts.remove(i);
 				i--;
 			}
 		}
 		for (int i = 0; i < aBlasts.size(); i++) {
-			if (aBlasts.get(i).getY() > screenH + 50) {
+			if (aBlasts.get(i).y() > screenH + 50) {
 				aBlasts.remove(i);
 				i--;
 			}
@@ -116,7 +123,7 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 
 		// removes rewards outside of screen
 		for (int i = 0; i < rewards.size(); i++) {
-			if (rewards.get(i).getX() > screenW + 50) {
+			if (rewards.get(i).x() > screenW + 50) {
 				rewards.remove(i);
 				i--;
 			}
@@ -124,36 +131,42 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 	}
 
 	private void paints(Graphics g) {
-		// paint messages
-		g.setColor(Color.WHITE);
-		for (int i = 0; i < messages.size(); i++) {
-			g.setColor(messages.get(i).color());
-			g.drawString(messages.get(i).message(), 10, 20 + 20 * i);
-			messages.get(i).incTime();
+		for (Boss b : bosses) {
+			b.paint(g);
 		}
 
-		// paint explosions
-		for (Explosion e : explosions) {
-			e.paint(g);
-		}
+		if (!bossFight) {
+			// paint messages
+			g.setColor(Color.WHITE);
+			for (int i = 0; i < messages.size(); i++) {
+				g.setColor(messages.get(i).color());
+				g.drawString(messages.get(i).message(), 10, 20 + 20 * i);
+				messages.get(i).incTime();
+			}
 
-		// paint rewards
-		for (Reward r : rewards) {
-			r.paint(g);
-		}
+			// paint explosions
+			for (Explosion e : explosions) {
+				e.paint(g);
+			}
 
-		// paint aliens
-		for (Alien[] a1 : aliens) {
-			for (Alien a : a1) {
-				if (a.getY() > screenH + 10) {
-					explosionSound.play();
-					explosionSound.play();
-					gameOver = true;
+			// paint rewards
+			for (Reward r : rewards) {
+				r.paint(g);
+			}
+
+			// paint aliens
+			for (Alien[] a1 : aliens) {
+				for (Alien a : a1) {
+					if (a.y() > screenH + 10) {
+						explosionSound.play();
+						explosionSound.play();
+						gameOver = true;
+					}
+					if (a.shoot()) {
+						aBlasts.add(new Blast(a.x() + 40, a.y() + 55, 1)); // alien center is +40,+55
+					}
+					a.paint(g);
 				}
-				if (a.shoot()) {
-					aBlasts.add(new Blast(a.getX() + 40, a.getY() + 55, 1)); // alien center is +40,+55
-				}
-				a.paint(g);
 			}
 		}
 
@@ -167,9 +180,9 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 			b.paint(g);
 		}
 
-		if (player.shoot()) {
-			blasts.add(new Blast(player.getX() + 11, player.getY() + 60, 0));
-			blasts.add(new Blast(player.getX() + 115, player.getY() + 60, 0));
+		if (player.checkShot()) {
+			blasts.add(new Blast(player.x() + 11, player.y() + 60, 0));
+			blasts.add(new Blast(player.x() + 115, player.y() + 60, 0));
 			player.incShotsFired();
 		}
 
@@ -184,7 +197,7 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 				for (int i = 0; i < blasts.size(); i++) {
 					Blast b = blasts.get(i);
 					if (b.hit(a)) {
-						explosions.add(new Explosion(a));
+						explosions.add(new Explosion(b));
 						explosionSound.play();
 						blasts.remove(i);
 						a.respawn();
@@ -202,11 +215,11 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 			Blast b = blasts.get(i);
 			for (int x = 0; x < rewards.size(); x++) {
 				if (b.hit(rewards.get(x))) {
-					if (rewards.get(x).getClass().toString().equals("class Ammo")) {
+					if (rewards.get(x).isType("ammo")) {
 						player.decreaseCooldown();
 						messages.add(new Message("Reload decreased to " + player.getCooldown()[1], Color.GREEN));
-					} else if (rewards.get(x).getClass().toString().equals("class Heart")) {
-						player.incLives(1);
+					} else if (rewards.get(x).isType("heart")) {
+						player.lives(1);
 						messages.add(new Message("Health increased", Color.GREEN));
 					}
 					blasts.remove(i);
@@ -221,9 +234,9 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 		for (int i = 0; i < aBlasts.size(); i++) {
 			Blast b = aBlasts.get(i);
 			if (b.hit(player)) {
+				explosions.add(new Explosion(b));
+				explosionSound.play();
 				aBlasts.remove(i);
-				// remove hearts/end game
-				player.incLives(-1);
 				player.hit();
 				messages.add(new Message("Player hit", Color.RED));
 				i--;
@@ -245,14 +258,34 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 		frame.addMouseListener(this);
 		t.start();
 
-		// generate aliens
+		generate();
+
+		frame.setVisible(true);
+	}
+
+	public void generate() {
+		aliens = new Alien[6][4];
+
+		// populate aliens array
 		for (int r = 0; r < aliens.length; r++) {
 			for (int c = 0; c < aliens[r].length; c++) {
 				aliens[r][c] = new Alien(100 * r + 650, 100 * c - 150, c % 2);
 			}
 		}
 
-		frame.setVisible(true);
+		player = new Player(screenW / 2, screenH - 280);
+		blasts = new ArrayList<Blast>();
+		aBlasts = new ArrayList<Blast>();
+		rewards = new ArrayList<Reward>();
+		explosions = new ArrayList<Explosion>();
+		messages = new ArrayList<Message>();
+		bosses = new ArrayList<Boss>();
+
+		explosionSound = new Audio("explosion.wav", false);
+
+		rewardTimer = 0;
+		playing = true;
+		gameOver = false;
 	}
 
 	Timer t = new Timer(16, this);
@@ -273,8 +306,11 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 			// was 68, not 60
 			player.setShooting(true);
 			break;
+		case 27: // ESC
+			generate();
+			break;
 		default:
-			// System.out.println("Unrecognized, key code: " + arg0.getKeyCode());
+//			 System.out.println("Unrecognized, key code: " + arg0.getKeyCode());
 			break;
 		}
 	}

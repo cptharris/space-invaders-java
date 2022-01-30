@@ -47,9 +47,10 @@ public class Player extends FlyingObj {
 
 	public void hit() {
 		hits++;
+		lives--;
 	}
 
-	public boolean shoot() {
+	public boolean checkShot() {
 		if (shooting && cooldown[0] == 0) {
 			cooldown[0] = cooldown[1];
 			return true;
@@ -79,11 +80,11 @@ public class Player extends FlyingObj {
 		kills++;
 	}
 
-	public int getLives() {
+	public int lives() {
 		return lives;
 	}
 
-	public void incLives(int updown) {
+	public void lives(int updown) {
 		this.lives += 1 * updown;
 	}
 

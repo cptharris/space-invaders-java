@@ -1,8 +1,8 @@
 public class Alien extends FlyingObj {
-	private int direction;
+	protected int direction;
 	private int version;
 	private int type;
-	private int vx;
+	protected int vx;
 	private int shotChance = 400;
 
 	public Alien() {
@@ -39,7 +39,7 @@ public class Alien extends FlyingObj {
 		// max = 750, min = 250
 		y = -1 * ((int) (Math.random() * 501) + 250);
 		vx++;
-		shotChance -= 10;
+		shotChance -= 50;
 	}
 
 	public boolean shoot() {

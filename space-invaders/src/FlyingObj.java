@@ -27,7 +27,7 @@ public class FlyingObj {
 		range = 650;
 	}
 
-	public void changePicture(String fileName) {
+	protected void changePicture(String fileName) {
 		img = getImage("/imgs/" + fileName);
 		init(x, y);
 	}
@@ -76,27 +76,27 @@ public class FlyingObj {
 		return "[x=" + x + ", y=" + y + ", width=" + width + ", height=" + height + "]";
 	}
 
-	public int getX() {
+	public int x() {
 		return x;
 	}
 
-	public void setX(int x) {
+	public void x(int x) {
 		this.x = x;
 	}
 
-	public int getY() {
+	public int y() {
 		return y;
 	}
 
-	public void setY(int y) {
+	public void y(int y) {
 		this.y = y;
 	}
 
-	public double getWidth() {
+	public double width() {
 		return width;
 	}
 
-	public double getHeight() {
+	public double height() {
 		return height;
 	}
 }
