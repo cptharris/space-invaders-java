@@ -23,6 +23,7 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 	ArrayList<Explosion> explosions;
 	ArrayList<Message> messages;
 	ArrayList<Boss> bosses;
+	ArrayList<Star> stars;
 
 	Audio explosionSound;
 
@@ -38,6 +39,8 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 			g.setColor(Color.WHITE);
 			g.setFont(new Font("Dialog", Font.PLAIN, 50));
 			g.drawString("Game Over", screenW / 2 - 150, screenH / 2);
+			g.setFont(new Font("Dialog", Font.PLAIN, 25));
+			g.drawString("Press ESC to restart.", screenW / 2 - 140, screenH / 2 + 150);
 			return;
 		}
 
@@ -131,6 +134,10 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 	}
 
 	private void paints(Graphics g) {
+		for (Star s : stars) {
+			s.paint(g);
+		}
+
 		for (Boss b : bosses) {
 			b.paint(g);
 		}
@@ -280,6 +287,11 @@ public class Driver extends JPanel implements ActionListener, KeyListener, Mouse
 		explosions = new ArrayList<Explosion>();
 		messages = new ArrayList<Message>();
 		bosses = new ArrayList<Boss>();
+		stars = new ArrayList<Star>();
+
+		while (stars.size() < 200) {
+			stars.add(new Star());
+		}
 
 		explosionSound = new Audio("explosion.wav", false);
 
